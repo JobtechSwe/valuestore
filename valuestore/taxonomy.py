@@ -1,7 +1,9 @@
 import logging as log
-from sokkandidater import settings
+import os
 from elasticsearch.exceptions import RequestError
 from . import elastic
+
+ES_TAX_INDEX = os.getenv('ES_TAX_INDEX', 'taxonomy')
 
 
 def get_concept(tax_id, tax_typ):
@@ -15,7 +17,7 @@ def get_concept(tax_id, tax_typ):
                 }
             }
         }
-    return _format_response(elastic.search(index=settings.ES_TAX_INDEX, body=query_dsl))
+    return _format_response(elastic.search(index=ES_TAX_INDEX, body=query_dsl))
 
 
 def find_concepts(query_string=None, taxonomy_code=None, entity_type=None,
@@ -53,7 +55,7 @@ def find_concepts(query_string=None, taxonomy_code=None, entity_type=None,
     if sort:
         query_dsl['sort'] = sort
     try:
-        return _format_response(elastic.search(index=settings.ES_TAX_INDEX,
+        return _format_response(elastic.search(index=ES_TAX_INDEX,
                                                body=query_dsl))
     except RequestError:
         log.error("Failed to query Elasticsearch")

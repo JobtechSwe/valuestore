@@ -1,9 +1,37 @@
-import logging as log
+import logging
 import os
+import json
 from elasticsearch.exceptions import RequestError
 from . import elastic
 
-ES_TAX_INDEX = os.getenv('ES_TAX_INDEX', 'taxonomy')
+log = logging.getLogger(__name__)
+
+ES_TAX_INDEX = os.getenv('ES_TAX_INDEX', 'taxonomy2')
+
+# Constants
+OCCUPATION = 'yrkesroll'
+GROUP = 'yrkesgrupp'
+FIELD = 'yrkesomrade'
+SKILL = 'kompetens'
+PLACE = 'plats'
+MUNICIPALITY = 'kommun'
+REGION = 'lan'
+WORKTIME_EXTENT = 'arbetstidsomfattning'
+LANGUAGE = 'sprak'
+
+tax_type = {
+    OCCUPATION: 'jobterm',
+    GROUP: 'jobgroup',
+    FIELD: 'jobfield',
+    SKILL: 'skill',
+    MUNICIPALITY: 'municipality',
+    REGION: 'region',
+    WORKTIME_EXTENT: 'worktime_extent',
+    PLACE: 'place',
+    LANGUAGE: 'language',
+}
+
+reverse_tax_type = {item[1]: item[0] for item in tax_type.items()}
 
 
 def get_concept(tax_id, tax_typ):
@@ -52,11 +80,14 @@ def find_concepts(query_string=None, taxonomy_code=None, entity_type=None,
                 "from": offset,
                 "size": limit
             }
+    print("name", __name__)
+    print("index", ES_TAX_INDEX)
+    log.info(json.dumps(query_dsl))
     if sort:
         query_dsl['sort'] = sort
     try:
-        return _format_response(elastic.search(index=ES_TAX_INDEX,
-                                               body=query_dsl))
+        elastic_response = elastic.search(index=ES_TAX_INDEX, body=query_dsl)
+        return elastic_response
     except RequestError:
         log.error("Failed to query Elasticsearch")
         return None

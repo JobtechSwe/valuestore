@@ -2,11 +2,10 @@ import logging
 import os
 import json
 from elasticsearch.exceptions import RequestError
-from . import elastic
 
 log = logging.getLogger(__name__)
 
-ES_TAX_INDEX = os.getenv('ES_TAX_INDEX', 'taxonomy2')
+ES_TAX_INDEX = os.getenv('ES_TAX_INDEX', 'taxonomy')
 
 # Constants
 OCCUPATION = 'yrkesroll'
@@ -34,7 +33,7 @@ tax_type = {
 reverse_tax_type = {item[1]: item[0] for item in tax_type.items()}
 
 
-def get_concept(tax_id, tax_typ):
+def get_concept(elastic_client, tax_id, tax_typ):
     query_dsl = {
             "query": {
                 "bool": {
@@ -45,10 +44,10 @@ def get_concept(tax_id, tax_typ):
                 }
             }
         }
-    return _format_response(elastic.search(index=ES_TAX_INDEX, body=query_dsl))
+    return format_response(elastic_client.search(index=ES_TAX_INDEX, body=query_dsl))
 
 
-def find_concepts(query_string=None, taxonomy_code=None, entity_type=None,
+def find_concepts(elastic_client, query_string=None, taxonomy_code=None, entity_type=None,
                   offset=0, limit=10):
     musts = []
     sort = None
@@ -86,14 +85,14 @@ def find_concepts(query_string=None, taxonomy_code=None, entity_type=None,
     if sort:
         query_dsl['sort'] = sort
     try:
-        elastic_response = elastic.search(index=ES_TAX_INDEX, body=query_dsl)
+        elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query_dsl)
         return elastic_response
     except RequestError:
         log.error("Failed to query Elasticsearch")
         return None
 
 
-def _format_response(elastic_response):
+def format_response(elastic_response):
     response = {
             "antal": elastic_response.get('hits', {}).get('total'),
             "entiteter": []

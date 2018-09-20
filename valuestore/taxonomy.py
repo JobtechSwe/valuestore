@@ -47,8 +47,7 @@ def get_concept(elastic_client, tax_id, tax_typ):
     return format_response(elastic_client.search(index=ES_TAX_INDEX, body=query_dsl))
 
 
-def find_concepts(elastic_client, query_string=None, taxonomy_code=None, entity_type=None,
-                  offset=0, limit=10):
+def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
     musts = []
     sort = None
     if query_string:
@@ -79,11 +78,15 @@ def find_concepts(elastic_client, query_string=None, taxonomy_code=None, entity_
                 "from": offset,
                 "size": limit
             }
-    print("name", __name__)
-    print("index", ES_TAX_INDEX)
     log.info(json.dumps(query_dsl))
     if sort:
         query_dsl['sort'] = sort
+    return query_dsl
+
+
+def find_concepts(elastic_client, query_string=None, taxonomy_code=None, entity_type=None,
+                  offset=0, limit=10):
+    query_dsl = _build_query(query_string, taxonomy_code, entity_type, offset, limit)
     try:
         elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query_dsl)
         return elastic_response

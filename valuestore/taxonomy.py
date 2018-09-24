@@ -53,16 +53,19 @@ def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
     if query_string:
         musts.append({"term": {"label.autocomplete": query_string}})
     else:
-        offset = 0  # TODO parametrise offset ans limit
+        offset = 0  # TODO parametrise offset and limit
         limit = 5000
-        # No numerical sorting for autocomplete-query
+        # Sort numerically for non-query_string-queries
         sort = [
             {
                 "num_id": {"order": "asc"}
             }
         ]
     if taxonomy_code:
-        musts.append({"term": {"parent.id": taxonomy_code}})
+        parent_or_grandparent = {"bool": {"should": [{"term": {"parent.id": taxonomy_code}},
+                                                     {"term": {"parent.parent.id": taxonomy_code}}]}}
+        #musts.append({"term": {"parent.id": taxonomy_code}})
+        musts.append(parent_or_grandparent)
     if entity_type:
         musts.append({"term": {"type": entity_type}})
 
@@ -78,7 +81,6 @@ def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
                 "from": offset,
                 "size": limit
             }
-    log.info(json.dumps(query_dsl))
     if sort:
         query_dsl['sort'] = sort
     return query_dsl
@@ -87,8 +89,10 @@ def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
 def find_concepts(elastic_client, query_string=None, taxonomy_code=None, entity_type=None,
                   offset=0, limit=10):
     query_dsl = _build_query(query_string, taxonomy_code, entity_type, offset, limit)
+    log.debug("Query: %s" % json.dumps(query_dsl))
     try:
         elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query_dsl)
+        log.debug("Response: %s" % json.dumps(elastic_response))
         return elastic_response
     except RequestError:
         log.error("Failed to query Elasticsearch")

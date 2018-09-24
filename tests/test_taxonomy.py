@@ -43,7 +43,8 @@ def test_find_concepts(query_string, taxonomy_code, entity_type, offset, limit):
         assert d['size'] == limit
         assert {'term': {'label.autocomplete': query_string}} in musts # alt. assert list(find('label.autocomplete', d)) == [query_string]
         if taxonomy_code:
-            assert {'term': {'parent.id': taxonomy_code}} in musts
+            assert {"bool": {"should": [{"term": {"parent.id": taxonomy_code}},
+                                        {"term": {"parent.parent.id": taxonomy_code}}]}} in musts
         if entity_type:
             assert {'term': {'type': entity_type}} in musts
         assert d['from'] == offset

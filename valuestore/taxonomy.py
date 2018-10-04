@@ -33,7 +33,7 @@ tax_type = {
     PLACE: 'place',
     LANGUAGE: 'language',
     EMPLOYMENT_TYPE: 'employment_type',
-    DRIVING_LICENCE: 'driving_licence',
+    DRIVING_LICENCE: 'driving_licence'
 }
 
 reverse_tax_type = {item[1]: item[0] for item in tax_type.items()}

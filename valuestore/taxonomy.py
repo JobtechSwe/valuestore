@@ -33,7 +33,7 @@ tax_type = {
     PLACE: 'place',
     LANGUAGE: 'language',
     EMPLOYMENT_TYPE: 'employment_type',
-    DRIVING_LICENCE: 'driving_licence'
+    DRIVING_LICENCE: 'driving_licence',
 }
 
 reverse_tax_type = {item[1]: item[0] for item in tax_type.items()}
@@ -68,9 +68,11 @@ def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
             }
         ]
     if taxonomy_code:
-        parent_or_grandparent = {"bool": {"should": [{"term": {"parent.id": taxonomy_code}},
-                                                     {"term": {"parent.parent.id": taxonomy_code}}]}}
-        #musts.append({"term": {"parent.id": taxonomy_code}})
+        parent_or_grandparent = {"bool": {"should": [
+            {"term": {"parent.id": taxonomy_code}},
+            {"term": {"parent.parent.id": taxonomy_code}}
+        ]}}
+        # musts.append({"term": {"parent.id": taxonomy_code}})
         musts.append(parent_or_grandparent)
     if entity_type:
         musts.append({"term": {"type": entity_type}})

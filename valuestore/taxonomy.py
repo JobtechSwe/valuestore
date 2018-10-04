@@ -15,8 +15,11 @@ SKILL = 'kompetens'
 PLACE = 'plats'
 MUNICIPALITY = 'kommun'
 REGION = 'lan'
-WORKTIME_EXTENT = 'arbetstidsomfattning'
+COUNTRY = 'land'
 LANGUAGE = 'sprak'
+WORKTIME_EXTENT = 'arbetstidsomfattning'
+EMPLOYMENT_TYPE = 'anstallningstyp'
+DRIVING_LICENCE = 'korkort'
 
 tax_type = {
     OCCUPATION: 'jobterm',
@@ -25,9 +28,12 @@ tax_type = {
     SKILL: 'skill',
     MUNICIPALITY: 'municipality',
     REGION: 'region',
+    COUNTRY: 'country',
     WORKTIME_EXTENT: 'worktime_extent',
     PLACE: 'place',
     LANGUAGE: 'language',
+    EMPLOYMENT_TYPE: 'employment_type',
+    DRIVING_LICENCE: 'driving_licence'
 }
 
 reverse_tax_type = {item[1]: item[0] for item in tax_type.items()}

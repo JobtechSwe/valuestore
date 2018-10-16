@@ -89,10 +89,9 @@ def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
             }
         ]
     if taxonomy_code:
-        parent_or_grandparent = {"bool": {"should": [
-            {"term": {"parent.id": taxonomy_code}},
-            {"term": {"parent.parent.id": taxonomy_code}}
-        ]}}
+        terms = [{"term": {"parent.id": t}} for t in taxonomy_code]
+        terms += [{"term": {"parent.parent.id": t}} for t in taxonomy_code]
+        parent_or_grandparent = {"bool": {"should": terms}}
         # musts.append({"term": {"parent.id": taxonomy_code}})
         musts.append(parent_or_grandparent)
     if entity_type:
@@ -141,7 +140,7 @@ def get_entity(elastic_client, taxtype, taxid, not_found_response=None):
     return taxonomy_entity
 
 
-def find_concepts(elastic_client, query_string=None, taxonomy_code=None, entity_type=None,
+def find_concepts(elastic_client, query_string=None, taxonomy_code=[], entity_type=None,
                   offset=0, limit=10):
     query_dsl = _build_query(query_string, taxonomy_code, entity_type, offset, limit)
     log.debug("Query: %s" % json.dumps(query_dsl))

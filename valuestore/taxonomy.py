@@ -21,6 +21,11 @@ LANGUAGE = 'sprak'
 WORKTIME_EXTENT = 'arbetstidsomfattning'
 EMPLOYMENT_TYPE = 'anstallningstyp'
 DRIVING_LICENCE = 'korkort'
+WAGE_TYPE = 'lonetyp'
+EDUCATION_LEVEL = 'utbildningsniva'
+EDUCATION_FIELD = 'utbildningsinriktning'
+DURATION = 'varaktighet'
+OCCUPATION_EXPERIENCE = 'erfarenhetsniva'
 
 # TODO: Check if taxtype and taxtype_legend can be combined
 tax_type = {
@@ -35,7 +40,12 @@ tax_type = {
     PLACE: 'place',
     LANGUAGE: 'language',
     EMPLOYMENT_TYPE: 'employment_type',
-    DRIVING_LICENCE: 'driving_licence'
+    DRIVING_LICENCE: 'driving_licence',
+    WAGE_TYPE: 'wage_type',
+    EDUCATION_LEVEL: 'education_level',
+    EDUCATION_FIELD: 'education_field',
+    DURATION: 'duration',
+    OCCUPATION_EXPERIENCE: 'occupation_experience'
 }
 taxtype_legend = {
     'yrke': 'jobterm',

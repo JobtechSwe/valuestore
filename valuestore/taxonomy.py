@@ -43,8 +43,8 @@ tax_type = {
     DRIVING_LICENCE: 'driving_licence',
     WAGE_TYPE: 'wage_type',
     EDUCATION_LEVEL: 'education_level',
-    EDUCATION_FIELD: 'education_field',
-    DURATION: 'duration',
+    EDUCATION_FIELD: 'education',
+    DURATION: 'duration_type',
     OCCUPATION_EXPERIENCE: 'occupation_experience'
 }
 taxtype_legend = {
@@ -65,6 +65,7 @@ taxtype_legend = {
     'lonetyp': 'wage_type',
     'anstallningstyp': 'employment_type',
     'arbetstidstyp': 'worktime_extent',
+    'erfarenhetsniva': 'occupation_experience'
 }
 
 reverse_tax_type = {item[1]: item[0] for item in tax_type.items()}

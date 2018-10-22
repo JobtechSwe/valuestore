@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 ES_TAX_INDEX = os.getenv('ES_TAX_INDEX', 'taxonomy')
 taxonomy_cache = {}
 
-# Constants
+# Swedish Constants (not used)
 OCCUPATION = 'yrkesroll'
 GROUP = 'yrkesgrupp'
 FIELD = 'yrkesomrade'
@@ -26,6 +26,24 @@ EDUCATION_LEVEL = 'utbildningsniva'
 EDUCATION_FIELD = 'utbildningsinriktning'
 DURATION = 'varaktighet'
 OCCUPATION_EXPERIENCE = 'erfarenhetsniva'
+# English Constants
+OCCUPATION = 'occupation'
+GROUP = 'group'
+FIELD = 'field'
+SKILL = 'skill'
+PLACE = 'place'
+MUNICIPALITY = 'municipality'
+REGION = 'region'
+COUNTRY = 'country'
+LANGUAGE = 'language'
+WORKTIME_EXTENT = 'extent'
+EMPLOYMENT_TYPE = 'employmenttype'
+DRIVING_LICENCE = 'drivinglicence'
+WAGE_TYPE = 'wagetype'
+EDUCATION_LEVEL = 'educationlevel'
+EDUCATION_FIELD = 'educationfield'
+DURATION = 'duration'
+OCCUPATION_EXPERIENCE = 'experience'
 
 # TODO: Check if taxtype and taxtype_legend can be combined
 tax_type = {

@@ -9,23 +9,23 @@ ES_TAX_INDEX = os.getenv('ES_TAX_INDEX', 'taxonomy')
 taxonomy_cache = {}
 
 # Swedish Constants (not used)
-OCCUPATION = 'yrkesroll'
-GROUP = 'yrkesgrupp'
-FIELD = 'yrkesomrade'
-SKILL = 'kompetens'
-PLACE = 'plats'
-MUNICIPALITY = 'kommun'
-REGION = 'lan'
-COUNTRY = 'land'
-LANGUAGE = 'sprak'
-WORKTIME_EXTENT = 'arbetstidsomfattning'
-EMPLOYMENT_TYPE = 'anstallningstyp'
-DRIVING_LICENCE = 'korkort'
-WAGE_TYPE = 'lonetyp'
-EDUCATION_LEVEL = 'utbildningsniva'
-EDUCATION_FIELD = 'utbildningsinriktning'
-DURATION = 'varaktighet'
-OCCUPATION_EXPERIENCE = 'erfarenhetsniva'
+OCCUPATION_SV = 'yrkesroll'
+GROUP_SV = 'yrkesgrupp'
+FIELD_SV = 'yrkesomrade'
+SKILL_SV = 'kompetens'
+PLACE_SV = 'plats'
+MUNICIPALITY_SV = 'kommun'
+REGION_SV = 'lan'
+COUNTRY_SV = 'land'
+LANGUAGE_SV = 'sprak'
+WORKTIME_EXTENT_SV = 'arbetstidsomfattning'
+EMPLOYMENT_TYPE_SV = 'anstallningstyp'
+DRIVING_LICENCE_SV = 'korkort'
+WAGE_TYPE_SV = 'lonetyp'
+EDUCATION_LEVEL_SV = 'utbildningsniva'
+EDUCATION_FIELD_SV = 'utbildningsinriktning'
+DURATION_SV = 'varaktighet'
+OCCUPATION_EXPERIENCE_SV = 'erfarenhetsniva'
 # English Constants
 OCCUPATION = 'occupation'
 GROUP = 'group'
@@ -48,22 +48,40 @@ OCCUPATION_EXPERIENCE = 'experience'
 # TODO: Check if taxtype and taxtype_legend can be combined
 tax_type = {
     OCCUPATION: 'jobterm',
+    OCCUPATION_SV: 'jobterm',
+    'yrkesroll': 'jobterm',
     GROUP: 'jobgroup',
+    GROUP_SV: 'jobgroup',
     FIELD: 'jobfield',
+    FIELD_SV: 'jobfield',
     SKILL: 'skill',
+    SKILL_SV: 'skill',
     MUNICIPALITY: 'municipality',
+    MUNICIPALITY_SV: 'municipality',
     REGION: 'region',
+    REGION_SV: 'region',
     COUNTRY: 'country',
+    COUNTRY_SV: 'country',
     WORKTIME_EXTENT: 'worktime_extent',
+    WORKTIME_EXTENT_SV: 'worktime_extent',
     PLACE: 'place',
+    PLACE_SV: 'place',
     LANGUAGE: 'language',
+    LANGUAGE_SV: 'language',
     EMPLOYMENT_TYPE: 'employment_type',
+    EMPLOYMENT_TYPE_SV: 'employment_type',
     DRIVING_LICENCE: 'driving_licence',
+    DRIVING_LICENCE_SV: 'driving_licence',
     WAGE_TYPE: 'wage_type',
+    WAGE_TYPE_SV: 'wage_type',
     EDUCATION_LEVEL: 'education_level',
+    EDUCATION_LEVEL_SV: 'education_level',
     EDUCATION_FIELD: 'education',
+    EDUCATION_FIELD_SV: 'education',
     DURATION: 'duration_type',
-    OCCUPATION_EXPERIENCE: 'occupation_experience'
+    DURATION_SV: 'duration_type',
+    OCCUPATION_EXPERIENCE: 'occupation_experience',
+    OCCUPATION_EXPERIENCE_SV: 'occupation_experience'
 }
 taxtype_legend = {
     'yrke': 'jobterm',

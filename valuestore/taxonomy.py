@@ -199,7 +199,9 @@ def get_entity(elastic_client, taxtype, taxid, not_found_response=None):
                                                 id=doc_id,
                                                 doc_type='_all', ignore=404)
     if not taxonomy_entity:
-        log.warning("No taxonomy entity found for type %s and id %s" % (taxtype, taxid))
+        log.warning("No taxonomy entity found for type %s and id %s (%s)" % (taxtype,
+                                                                             taxid,
+                                                                             doc_id))
         return not_found_response
     return taxonomy_entity
 

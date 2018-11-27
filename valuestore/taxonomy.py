@@ -183,7 +183,7 @@ def get_term(elastic_client, taxtype, taxid):
         taxonomy_cache[taxtype] = {}
     if taxid in taxonomy_cache[taxtype]:
         return taxonomy_cache[taxtype][taxid]
-    taxonomy_entity = get_entity(elastic_client, taxtype, taxid, {})
+    taxonomy_entity = find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxtype, taxid, {})
     label = None
     if 'label' in taxonomy_entity:
         label = taxonomy_entity['label']
@@ -204,6 +204,26 @@ def get_entity(elastic_client, taxtype, taxid, not_found_response=None):
                                                                              doc_id))
         return not_found_response
     return taxonomy_entity
+
+def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type, legacy_ams_taxonomy_id, not_found_response=None):
+    query = {
+        "query": {
+            "bool": {
+                "must": [
+                    {"match": {"legacy_ams_taxonomy_id": legacy_ams_taxonomy_id}},
+                    {"match": {"type": taxonomy_type}}
+                ]
+            }
+        }
+    }
+    elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query)
+    hits = elastic_response.get('hits', {}).get('hits', [])
+    if not hits:
+        log.warning("No taxonomy entity found for type %s and legacy id %s" % (taxonomy_type,
+                                                                             legacy_ams_taxonomy_id
+                                                                             ))
+        return not_found_response
+    return hits[0]['_source']
 
 
 def find_concepts(elastic_client, query_string=None, taxonomy_code=[], entity_type=None,

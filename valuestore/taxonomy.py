@@ -129,7 +129,7 @@ def get_concept(elastic_client, tax_id, tax_typ):
             "query": {
                 "bool": {
                     "must": [
-                        {"term": {"id": tax_id}},
+                        {"term": {"legacy_ams_taxonomy_id": tax_id}},
                         {"term": {"type": tax_typ}}
                     ]
                 }
@@ -194,7 +194,9 @@ def get_term(elastic_client, taxtype, taxid):
 
 
 def get_entity(elastic_client, taxtype, taxid, not_found_response=None):
-    doc_id = "%s-%s" % (taxtype_legend.get(taxtype, ''), taxid)
+
+    # old version doc_id = "%s-%s" % (taxtype_legend.get(taxtype, ''), taxid)
+    doc_id = taxid  # document id changed from type-id format to just the concept_id
     taxonomy_entity = elastic_client.get_source(index=ES_TAX_INDEX,
                                                 id=doc_id,
                                                 doc_type='_all', ignore=404)
@@ -205,13 +207,14 @@ def get_entity(elastic_client, taxtype, taxid, not_found_response=None):
         return not_found_response
     return taxonomy_entity
 
+
 def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type, legacy_ams_taxonomy_id, not_found_response=None):
     query = {
         "query": {
             "bool": {
                 "must": [
                     {"match": {"legacy_ams_taxonomy_id": legacy_ams_taxonomy_id}},
-                    {"match": {"type": taxonomy_type}}
+                    {"match": {"type": taxtype_legend.get(taxonomy_type, '')}}
                 ]
             }
         }
@@ -220,8 +223,8 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type, legacy
     hits = elastic_response.get('hits', {}).get('hits', [])
     if not hits:
         log.warning("No taxonomy entity found for type %s and legacy id %s" % (taxonomy_type,
-                                                                             legacy_ams_taxonomy_id
-                                                                             ))
+                                                                               legacy_ams_taxonomy_id))
+        print(query)
         return not_found_response
     return hits[0]['_source']
 
@@ -246,7 +249,7 @@ def format_response(elastic_response):
             }
     for sourcehit in elastic_response.get('hits', {}).get('hits', []):
         hit = sourcehit['_source']
-        response['entiteter'].append({"kod": hit['id'], "term": hit['label'],
+        response['entiteter'].append({"kod": hit['legacy_ams_taxonomy_id'], "term": hit['label'],
                                       "typ": hit['type']})
 
     return response

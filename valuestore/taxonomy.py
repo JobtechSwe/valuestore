@@ -224,7 +224,6 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type, legacy
     if not hits:
         log.warning("No taxonomy entity found for type %s and legacy id %s" % (taxonomy_type,
                                                                                legacy_ams_taxonomy_id))
-        print(query)
         return not_found_response
     return hits[0]['_source']
 

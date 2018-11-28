@@ -117,6 +117,7 @@ taxtype_legend = {
     EMPLOYMENT_TYPE: 'employment_type',
     'arbetstidstyp': 'worktime_extent',
     WORKTIME_EXTENT: 'worktime_extent',
+    WORKTIME_EXTENT_SV: 'worktime_extent',
     'erfarenhetsniva': 'occupation_experience',
     OCCUPATION_EXPERIENCE: 'occupation_experience',
 }

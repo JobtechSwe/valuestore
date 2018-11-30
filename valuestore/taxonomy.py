@@ -150,12 +150,14 @@ def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
         # Sort numerically for non-query_string-queries
         sort = [
             {
-                "num_id": {"order": "asc"}
+                "legacy_ams_taxonomy_num_id": {"order": "asc"}
             }
         ]
     if taxonomy_code:
-        terms = [{"term": {"parent.id": t}} for t in taxonomy_code]
-        terms += [{"term": {"parent.parent.id": t}} for t in taxonomy_code]
+        terms = [{"term": {"parent.legacy_ams_taxonomy_id": t}} for t in taxonomy_code]
+        terms += [{"term": {"parent.concept_id.keyword": t}} for t in taxonomy_code]
+        terms += [{"term": {"parent.parent.legacy_ams_taxonomy_id": t}} for t in taxonomy_code]
+        terms += [{"term": {"parent.parent.concept_id.keyword": t}} for t in taxonomy_code]
         parent_or_grandparent = {"bool": {"should": terms}}
         # musts.append({"term": {"parent.id": taxonomy_code}})
         musts.append(parent_or_grandparent)
@@ -232,7 +234,7 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type, legacy
 def find_concepts(elastic_client, query_string=None, taxonomy_code=[], entity_type=None,
                   offset=0, limit=10):
     query_dsl = _build_query(query_string, taxonomy_code, entity_type, offset, limit)
-    log.debug("Query: %s" % json.dumps(query_dsl))
+    log.info("Query: %s" % json.dumps(query_dsl))
     try:
         elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query_dsl)
         log.debug("Response: %s" % json.dumps(elastic_response))

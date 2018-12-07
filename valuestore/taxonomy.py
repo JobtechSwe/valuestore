@@ -177,26 +177,15 @@ platsannons_key_to_jobtech_taxonomy_key = {
     'lonetyp': JobtechTaxonomy.WAGE_TYPE,
     'varaktighet': JobtechTaxonomy.EMPLOYMENT_DURATION,
     'arbetstidstyp': JobtechTaxonomy.WORKTIME_EXTENT,
+    'kommun': JobtechTaxonomy.MUNICIPALITY,
+    'lan': JobtechTaxonomy.COUNTY,
+    'land': JobtechTaxonomy.COUNTRY,
     'korkort': JobtechTaxonomy.DRIVING_LICENCE,
     'kompetens': JobtechTaxonomy.SKILL,
     'sprak': JobtechTaxonomy.LANGUAGE,
     'deprecated_educationlevel': JobtechTaxonomy.DEPRECATED_EDUCATION_LEVEL,
     'deprecated_educationfield': JobtechTaxonomy.DEPRECATED_EDUCATION_FIELD,
 }
-
-
-def get_concept(elastic_client, tax_id, tax_typ):
-    query_dsl = {
-            "query": {
-                "bool": {
-                    "must": [
-                        {"term": {"legacy_ams_taxonomy_id": tax_id}},
-                        {"term": {"type": platsannons_key_to_jobtech_taxonomy_key.get(tax_typ, '')}}
-                    ]
-                }
-            }
-        }
-    return format_response(elastic_client.search(index=ES_TAX_INDEX, body=query_dsl))
 
 
 def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
@@ -277,7 +266,7 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type, legacy
             "bool": {
                 "must": [
                     {"match": {"legacy_ams_taxonomy_id": legacy_ams_taxonomy_id}},
-                    {"match": {"type": taxtype_legend.get(taxonomy_type, '')}}
+                    {"match": {"type": platsannons_key_to_jobtech_taxonomy_key.get(taxonomy_type, '')}}
                 ]
             }
         }

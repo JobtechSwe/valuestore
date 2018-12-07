@@ -171,6 +171,19 @@ class JobtechTaxonomy:
     WAGE_TYPE = 'wage-type'
     WORKTIME_EXTENT = 'worktime-extent'
 
+platsannons_key_to_jobtech_taxonomy_key = {
+    'yrkesroll': JobtechTaxonomy.OCCUPATION_NAME,
+    'anstallningstyp': JobtechTaxonomy.EMPLOYMENT_TYPE,
+    'lonetyp': JobtechTaxonomy.WAGE_TYPE,
+    'varaktighet': JobtechTaxonomy.EMPLOYMENT_DURATION,
+    'arbetstidstyp': JobtechTaxonomy.WORKTIME_EXTENT,
+    'korkort': JobtechTaxonomy.DRIVING_LICENCE,
+    'kompetens': JobtechTaxonomy.SKILL,
+    'sprak': JobtechTaxonomy.LANGUAGE,
+    'deprecated_educationlevel': JobtechTaxonomy.DEPRECATED_EDUCATION_LEVEL,
+    'deprecated_educationfield': JobtechTaxonomy.DEPRECATED_EDUCATION_FIELD,
+}
+
 
 def get_concept(elastic_client, tax_id, tax_typ):
     query_dsl = {
@@ -178,7 +191,7 @@ def get_concept(elastic_client, tax_id, tax_typ):
                 "bool": {
                     "must": [
                         {"term": {"legacy_ams_taxonomy_id": tax_id}},
-                        {"term": {"type": tax_typ}}
+                        {"term": {"type": platsannons_key_to_jobtech_taxonomy_key.get(tax_typ, '')}}
                     ]
                 }
             }

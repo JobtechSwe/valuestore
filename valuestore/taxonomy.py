@@ -43,14 +43,8 @@ DRIVING_LICENCE = 'drivinglicence'
 WAGE_TYPE = 'wagetype'
 EDUCATION_LEVEL = 'educationlevel'
 DEPRECATED_EDUCATION_LEVEL = 'deprecated_educationlevel'
-EDUCATION_LEVEL_SUN1 = 'educationlevelSUN1'
-EDUCATION_LEVEL_SUN2 = 'educationlevelSUN2'
-EDUCATION_LEVEL_SUN3 = 'educationlevelSUN3'
 EDUCATION_FIELD = 'educationfield'
 DEPRECATED_EDUCATION_FIELD = 'deprecated_educationfield'
-EDUCATION_FIELD_SUN1 = 'educationfieldSUN1'
-EDUCATION_FIELD_SUN2 = 'educationfieldSUN2'
-EDUCATION_FIELD_SUN3 = 'educationfieldSUN3'
 DURATION = 'duration'
 OCCUPATION_EXPERIENCE = 'experience'
 
@@ -87,14 +81,8 @@ tax_type = {
     WAGE_TYPE_SV: 'wage_type',
     EDUCATION_LEVEL: 'education_level',
     EDUCATION_LEVEL_SV: 'education_level',
-    EDUCATION_LEVEL_SUN1: 'education_level_SUN1',
-    EDUCATION_LEVEL_SUN2: 'education_level_SUN2',
-    EDUCATION_LEVEL_SUN3: 'education_level_SUN3',
     EDUCATION_FIELD: 'education',
     EDUCATION_FIELD_SV: 'education',
-    EDUCATION_FIELD_SUN1: 'education_field_SUN1',
-    EDUCATION_FIELD_SUN2: 'education_field_SUN2',
-    EDUCATION_FIELD_SUN3: 'education_field_SUN3',
     DURATION: 'duration_type',
     DURATION_SV: 'duration_type',
     OCCUPATION_EXPERIENCE: 'occupation_experience',
@@ -165,9 +153,9 @@ class JobtechTaxonomy:
     SUN_EDUCATION_LEVEL_1 = 'sun-education-level-1'
     SUN_EDUCATION_LEVEL_2 = 'sun-education-level-2'
     SUN_EDUCATION_LEVEL_3 = 'sun-education-level-3'
-    SUN_EDUCATION_FIELD_1 = 'sun-education-level-1'
-    SUN_EDUCATION_FIELD_2 = 'sun-education-level-2'
-    SUN_EDUCATION_FIELD_3 = 'sun-education-level-3'
+    SUN_EDUCATION_FIELD_1 = 'sun-education-field-1'
+    SUN_EDUCATION_FIELD_2 = 'sun-education-field-2'
+    SUN_EDUCATION_FIELD_3 = 'sun-education-field-3'
     WAGE_TYPE = 'wage-type'
     WORKTIME_EXTENT = 'worktime-extent'
 

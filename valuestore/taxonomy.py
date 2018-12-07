@@ -26,6 +26,7 @@ EDUCATION_LEVEL_SV = 'utbildningsniva'
 EDUCATION_FIELD_SV = 'utbildningsinriktning'
 DURATION_SV = 'varaktighet'
 OCCUPATION_EXPERIENCE_SV = 'erfarenhetsniva'
+
 # English Constants
 OCCUPATION = 'occupation'
 GROUP = 'group'
@@ -52,6 +53,8 @@ EDUCATION_FIELD_SUN2 = 'educationfieldSUN2'
 EDUCATION_FIELD_SUN3 = 'educationfieldSUN3'
 DURATION = 'duration'
 OCCUPATION_EXPERIENCE = 'experience'
+
+
 
 # TODO: Check if taxtype and taxtype_legend can be combined
 tax_type = {
@@ -84,8 +87,14 @@ tax_type = {
     WAGE_TYPE_SV: 'wage_type',
     EDUCATION_LEVEL: 'education_level',
     EDUCATION_LEVEL_SV: 'education_level',
+    EDUCATION_LEVEL_SUN1: 'education_level_SUN1',
+    EDUCATION_LEVEL_SUN2: 'education_level_SUN2',
+    EDUCATION_LEVEL_SUN3: 'education_level_SUN3',
     EDUCATION_FIELD: 'education',
     EDUCATION_FIELD_SV: 'education',
+    EDUCATION_FIELD_SUN1: 'education_field_SUN1',
+    EDUCATION_FIELD_SUN2: 'education_field_SUN2',
+    EDUCATION_FIELD_SUN3: 'education_field_SUN3',
     DURATION: 'duration_type',
     DURATION_SV: 'duration_type',
     OCCUPATION_EXPERIENCE: 'occupation_experience',
@@ -115,6 +124,12 @@ taxtype_legend = {
     EDUCATION_FIELD: 'education',
     'utbildningsniva': 'education_level',
     EDUCATION_LEVEL: 'education_level',
+    'education_field_SUN2': 'education_field_SUN2',
+    'education_level_SUN1': 'education_level_SUN1',
+    'education_level_SUN2': 'education_level_SUN2',
+    'deprecated_educationfield': 'deprecated_educationfield',
+    'deprecated_educationlevel': 'deprecated_educationlevel',
+
     'korkort': 'driving_licence',
     DRIVING_LICENCE: 'driving_licence',
     'varaktighet': 'duration_type',
@@ -131,6 +146,30 @@ taxtype_legend = {
 }
 
 reverse_tax_type = {item[1]: item[0] for item in tax_type.items()}
+
+class JobtechTaxonomy:
+    COUNTY = 'county'
+    COUNTRY = 'country'
+    DEPRECATED_EDUCATION_LEVEL = 'deprecated-education-level'
+    DEPRECATED_EDUCATION_FIELD = 'deprecated-education-field'
+    DRIVING_LICENCE = 'driving-license'
+    EMPLOYMENT_DURATION = 'employment-duration'
+    EMPLOYMENT_TYPE = 'employment-type'
+    LANGUAGE = 'language'
+    MUNICIPALITY = 'municipality'
+    OCCUPATION_GROUP = 'occupation-group'
+    OCCUPATION_EXPERIENCE_YEARS = 'occupation-experience-years'
+    OCCUPATION_FIELD ='occupation-field'
+    OCCUPATION_NAME = 'occupation-name'
+    SKILL = 'skill'
+    SUN_EDUCATION_LEVEL_1 = 'sun-education-level-1'
+    SUN_EDUCATION_LEVEL_2 = 'sun-education-level-2'
+    SUN_EDUCATION_LEVEL_3 = 'sun-education-level-3'
+    SUN_EDUCATION_FIELD_1 = 'sun-education-level-1'
+    SUN_EDUCATION_FIELD_2 = 'sun-education-level-2'
+    SUN_EDUCATION_FIELD_3 = 'sun-education-level-3'
+    WAGE_TYPE = 'wage-type'
+    WORKTIME_EXTENT = 'worktime-extent'
 
 
 def get_concept(elastic_client, tax_id, tax_typ):

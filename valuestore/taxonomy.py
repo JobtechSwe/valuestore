@@ -26,6 +26,7 @@ EDUCATION_LEVEL_SV = 'utbildningsniva'
 EDUCATION_FIELD_SV = 'utbildningsinriktning'
 DURATION_SV = 'varaktighet'
 OCCUPATION_EXPERIENCE_SV = 'erfarenhetsniva'
+
 # English Constants
 OCCUPATION = 'occupation'
 GROUP = 'group'
@@ -41,7 +42,9 @@ EMPLOYMENT_TYPE = 'employmenttype'
 DRIVING_LICENCE = 'drivinglicence'
 WAGE_TYPE = 'wagetype'
 EDUCATION_LEVEL = 'educationlevel'
+DEPRECATED_EDUCATION_LEVEL = 'deprecated_educationlevel'
 EDUCATION_FIELD = 'educationfield'
+DEPRECATED_EDUCATION_FIELD = 'deprecated_educationfield'
 DURATION = 'duration'
 OCCUPATION_EXPERIENCE = 'experience'
 
@@ -107,6 +110,12 @@ taxtype_legend = {
     EDUCATION_FIELD: 'education',
     'utbildningsniva': 'education_level',
     EDUCATION_LEVEL: 'education_level',
+    'education_field_SUN2': 'education_field_SUN2',
+    'education_level_SUN1': 'education_level_SUN1',
+    'education_level_SUN2': 'education_level_SUN2',
+    'deprecated_educationfield': 'deprecated_educationfield',
+    'deprecated_educationlevel': 'deprecated_educationlevel',
+
     'korkort': 'driving_licence',
     DRIVING_LICENCE: 'driving_licence',
     'varaktighet': 'duration_type',
@@ -117,6 +126,7 @@ taxtype_legend = {
     EMPLOYMENT_TYPE: 'employment_type',
     'arbetstidstyp': 'worktime_extent',
     WORKTIME_EXTENT: 'worktime_extent',
+    WORKTIME_EXTENT_SV: 'worktime_extent',
     'erfarenhetsniva': 'occupation_experience',
     OCCUPATION_EXPERIENCE: 'occupation_experience',
 }
@@ -124,18 +134,50 @@ taxtype_legend = {
 reverse_tax_type = {item[1]: item[0] for item in tax_type.items()}
 
 
-def get_concept(elastic_client, tax_id, tax_typ):
-    query_dsl = {
-            "query": {
-                "bool": {
-                    "must": [
-                        {"term": {"id": tax_id}},
-                        {"term": {"type": tax_typ}}
-                    ]
-                }
-            }
-        }
-    return format_response(elastic_client.search(index=ES_TAX_INDEX, body=query_dsl))
+class JobtechTaxonomy:
+    COUNTY = 'county'
+    COUNTRY = 'country'
+    DEPRECATED_EDUCATION_LEVEL = 'deprecated-education-level'
+    DEPRECATED_EDUCATION_FIELD = 'deprecated-education-field'
+    DRIVING_LICENCE = 'driving-license'
+    EMPLOYMENT_DURATION = 'employment-duration'
+    EMPLOYMENT_TYPE = 'employment-type'
+    LANGUAGE = 'language'
+    MUNICIPALITY = 'municipality'
+    OCCUPATION_GROUP = 'occupation-group'
+    OCCUPATION_EXPERIENCE_YEARS = 'occupation-experience-years'
+    OCCUPATION_FIELD = 'occupation-field'
+    OCCUPATION_NAME = 'occupation-name'
+    SKILL = 'skill'
+    SUN_EDUCATION_LEVEL_1 = 'sun-education-level-1'
+    SUN_EDUCATION_LEVEL_2 = 'sun-education-level-2'
+    SUN_EDUCATION_LEVEL_3 = 'sun-education-level-3'
+    SUN_EDUCATION_FIELD_1 = 'sun-education-field-1'
+    SUN_EDUCATION_FIELD_2 = 'sun-education-field-2'
+    SUN_EDUCATION_FIELD_3 = 'sun-education-field-3'
+    WAGE_TYPE = 'wage-type'
+    WORKTIME_EXTENT = 'worktime-extent'
+
+
+annons_key_to_jobtech_taxonomy_key = {
+    'yrkesroll': JobtechTaxonomy.OCCUPATION_NAME,
+    OCCUPATION: JobtechTaxonomy.OCCUPATION_NAME,
+    GROUP:JobtechTaxonomy.OCCUPATION_GROUP,
+    FIELD:JobtechTaxonomy.OCCUPATION_FIELD,
+    'anstallningstyp': JobtechTaxonomy.EMPLOYMENT_TYPE,
+    'lonetyp': JobtechTaxonomy.WAGE_TYPE,
+    'varaktighet': JobtechTaxonomy.EMPLOYMENT_DURATION,
+    'arbetstidstyp': JobtechTaxonomy.WORKTIME_EXTENT,
+    'kommun': JobtechTaxonomy.MUNICIPALITY,
+    'lan': JobtechTaxonomy.COUNTY,
+    'land': JobtechTaxonomy.COUNTRY,
+    'korkort': JobtechTaxonomy.DRIVING_LICENCE,
+    'kompetens': JobtechTaxonomy.SKILL,
+    SKILL: JobtechTaxonomy.SKILL,
+    'sprak': JobtechTaxonomy.LANGUAGE,
+    'deprecated_educationlevel': JobtechTaxonomy.DEPRECATED_EDUCATION_LEVEL,
+    'deprecated_educationfield': JobtechTaxonomy.DEPRECATED_EDUCATION_FIELD,
+}
 
 
 def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
@@ -149,12 +191,20 @@ def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
         # Sort numerically for non-query_string-queries
         sort = [
             {
-                "num_id": {"order": "asc"}
+                "legacy_ams_taxonomy_num_id": {"order": "asc"}
             }
         ]
     if taxonomy_code:
-        terms = [{"term": {"parent.id": t}} for t in taxonomy_code]
-        terms += [{"term": {"parent.parent.id": t}} for t in taxonomy_code]
+        if not isinstance(taxonomy_code, list):
+            taxonomy_code = [taxonomy_code]
+        terms = [{"term": {"parent.legacy_ams_taxonomy_id": t}} for t in taxonomy_code]
+        terms += [{"term": {"parent.concept_id.keyword": t}} for t in taxonomy_code]
+        terms += [{"term":
+                   {"parent.parent.legacy_ams_taxonomy_id": t}
+                   } for t in taxonomy_code]
+        terms += [{"term":
+                   {"parent.parent.concept_id.keyword": t}
+                   } for t in taxonomy_code]
         parent_or_grandparent = {"bool": {"should": terms}}
         # musts.append({"term": {"parent.id": taxonomy_code}})
         musts.append(parent_or_grandparent)
@@ -175,15 +225,18 @@ def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
             }
     if sort:
         query_dsl['sort'] = sort
+    print("Taxonomy query dsl: %s" % json.dumps(query_dsl, indent=2))
     return query_dsl
 
 
 def get_term(elastic_client, taxtype, taxid):
+    print(f"TYPE: {taxtype} ID: {taxid}")
     if taxtype not in taxonomy_cache:
         taxonomy_cache[taxtype] = {}
     if taxid in taxonomy_cache[taxtype]:
         return taxonomy_cache[taxtype][taxid]
-    taxonomy_entity = get_entity(elastic_client, taxtype, taxid, {})
+    taxonomy_entity = find_concept_by_legacy_ams_taxonomy_id(elastic_client,
+                                                             taxtype, taxid, {})
     label = None
     if 'label' in taxonomy_entity:
         label = taxonomy_entity['label']
@@ -194,14 +247,46 @@ def get_term(elastic_client, taxtype, taxid):
 
 
 def get_entity(elastic_client, taxtype, taxid, not_found_response=None):
-    doc_id = "%s-%s" % (taxtype_legend.get(taxtype, ''), taxid)
+
+    # old version doc_id = "%s-%s" % (taxtype_legend.get(taxtype, ''), taxid)
+    doc_id = taxid  # document id changed from type-id format to just the concept_id
     taxonomy_entity = elastic_client.get_source(index=ES_TAX_INDEX,
                                                 id=doc_id,
                                                 doc_type='_all', ignore=404)
     if not taxonomy_entity:
-        log.warning("No taxonomy entity found for type %s and id %s" % (taxtype, taxid))
+        log.warning("No taxonomy entity found for type %s and id %s (%s)" % (taxtype,
+                                                                             taxid,
+                                                                             doc_id))
         return not_found_response
     return taxonomy_entity
+
+
+def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type,
+                                           legacy_ams_taxonomy_id,
+                                           not_found_response=None):
+    query = {
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"legacy_ams_taxonomy_id": {"value": legacy_ams_taxonomy_id}}},
+                    {"term": {
+                        "type": {
+                            "value": annons_key_to_jobtech_taxonomy_key.get(taxonomy_type, '')
+                        }
+                    }}
+                ]
+            }
+        }
+    }
+    print("QUERY", json.dumps(query))
+    elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query)
+    hits = elastic_response.get('hits', {}).get('hits', [])
+    if not hits:
+        log.warning("No taxonomy entity found for type %s and "
+                    "legacy id %s" % (taxonomy_type,
+                                      legacy_ams_taxonomy_id))
+        return not_found_response
+    return hits[0]['_source']
 
 
 def find_concepts(elastic_client, query_string=None, taxonomy_code=[], entity_type=None,
@@ -210,7 +295,7 @@ def find_concepts(elastic_client, query_string=None, taxonomy_code=[], entity_ty
     log.debug("Query: %s" % json.dumps(query_dsl))
     try:
         elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query_dsl)
-        log.debug("Response: %s" % json.dumps(elastic_response))
+        log.debug("Find Concepts Response: %s" % json.dumps(elastic_response))
         return elastic_response
     except RequestError:
         log.error("Failed to query Elasticsearch")
@@ -224,7 +309,8 @@ def format_response(elastic_response):
             }
     for sourcehit in elastic_response.get('hits', {}).get('hits', []):
         hit = sourcehit['_source']
-        response['entiteter'].append({"kod": hit['id'], "term": hit['label'],
+        response['entiteter'].append({"kod": hit['legacy_ams_taxonomy_id'],
+                                      "term": hit['label'],
                                       "typ": hit['type']})
 
     return response

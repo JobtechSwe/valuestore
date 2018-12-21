@@ -164,6 +164,9 @@ annons_key_to_jobtech_taxonomy_key = {
     OCCUPATION: JobtechTaxonomy.OCCUPATION_NAME,
     GROUP:JobtechTaxonomy.OCCUPATION_GROUP,
     FIELD:JobtechTaxonomy.OCCUPATION_FIELD,
+    OCCUPATION_SV: JobtechTaxonomy.OCCUPATION_NAME,
+    GROUP_SV:JobtechTaxonomy.OCCUPATION_GROUP,
+    FIELD_SV:JobtechTaxonomy.OCCUPATION_FIELD,
     'anstallningstyp': JobtechTaxonomy.EMPLOYMENT_TYPE,
     'lonetyp': JobtechTaxonomy.WAGE_TYPE,
     'varaktighet': JobtechTaxonomy.EMPLOYMENT_DURATION,
@@ -174,6 +177,7 @@ annons_key_to_jobtech_taxonomy_key = {
     'korkort': JobtechTaxonomy.DRIVING_LICENCE,
     'kompetens': JobtechTaxonomy.SKILL,
     SKILL: JobtechTaxonomy.SKILL,
+    SKILL_SV: JobtechTaxonomy.SKILL,
     'sprak': JobtechTaxonomy.LANGUAGE,
     'deprecated_educationlevel': JobtechTaxonomy.DEPRECATED_EDUCATION_LEVEL,
     'deprecated_educationfield': JobtechTaxonomy.DEPRECATED_EDUCATION_FIELD,
@@ -225,12 +229,10 @@ def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
             }
     if sort:
         query_dsl['sort'] = sort
-    print("Taxonomy query dsl: %s" % json.dumps(query_dsl, indent=2))
     return query_dsl
 
 
 def get_term(elastic_client, taxtype, taxid):
-    print(f"TYPE: {taxtype} ID: {taxid}")
     if taxtype not in taxonomy_cache:
         taxonomy_cache[taxtype] = {}
     if taxid in taxonomy_cache[taxtype]:
@@ -278,7 +280,6 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type,
             }
         }
     }
-    print("QUERY", json.dumps(query))
     elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query)
     hits = elastic_response.get('hits', {}).get('hits', [])
     if not hits:

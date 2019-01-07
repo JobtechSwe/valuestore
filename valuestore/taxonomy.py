@@ -280,7 +280,12 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type,
             }
         }
     }
-    elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query)
+    try:
+        elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query)
+    except RequestError as e:
+        log.warning("RequestError", str(e))
+        return not_found_response
+
     hits = elastic_response.get('hits', {}).get('hits', [])
     if not hits:
         log.warning("No taxonomy entity found for type %s and "

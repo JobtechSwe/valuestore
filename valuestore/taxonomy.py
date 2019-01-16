@@ -48,91 +48,6 @@ DEPRECATED_EDUCATION_FIELD = 'deprecated_educationfield'
 DURATION = 'duration'
 OCCUPATION_EXPERIENCE = 'experience'
 
-# TODO: Check if taxtype and taxtype_legend can be combined
-tax_type = {
-    OCCUPATION: 'jobterm',
-    OCCUPATION_SV: 'jobterm',
-    'yrkesroll': 'jobterm',
-    GROUP: 'jobgroup',
-    GROUP_SV: 'jobgroup',
-    FIELD: 'jobfield',
-    FIELD_SV: 'jobfield',
-    SKILL: 'skill',
-    SKILL_SV: 'skill',
-    MUNICIPALITY: 'municipality',
-    MUNICIPALITY_SV: 'municipality',
-    REGION: 'region',
-    REGION_SV: 'region',
-    COUNTRY: 'country',
-    COUNTRY_SV: 'country',
-    WORKTIME_EXTENT: 'worktime_extent',
-    WORKTIME_EXTENT_SV: 'worktime_extent',
-    PLACE: 'place',
-    PLACE_SV: 'place',
-    LANGUAGE: 'language',
-    LANGUAGE_SV: 'language',
-    EMPLOYMENT_TYPE: 'employment_type',
-    EMPLOYMENT_TYPE_SV: 'employment_type',
-    DRIVING_LICENCE: 'driving_licence',
-    DRIVING_LICENCE_SV: 'driving_licence',
-    WAGE_TYPE: 'wage_type',
-    WAGE_TYPE_SV: 'wage_type',
-    EDUCATION_LEVEL: 'education_level',
-    EDUCATION_LEVEL_SV: 'education_level',
-    EDUCATION_FIELD: 'education',
-    EDUCATION_FIELD_SV: 'education',
-    DURATION: 'duration_type',
-    DURATION_SV: 'duration_type',
-    OCCUPATION_EXPERIENCE: 'occupation_experience',
-    OCCUPATION_EXPERIENCE_SV: 'occupation_experience'
-}
-taxtype_legend = {
-    'yrke': 'jobterm',
-    'yrkesroll': 'jobterm',
-    OCCUPATION: 'jobterm',
-    'yrkesgrupp': 'jobgroup',
-    GROUP: 'jobgroup',
-    'yrkesomrade': 'jobfield',
-    FIELD: 'jobfield',
-    'sprak': 'language',
-    LANGUAGE: 'language',
-    'kompetens': 'skill',
-    SKILL: 'skill',
-    'kommun': 'municipality',
-    MUNICIPALITY: 'municipality',
-    'lan': 'region',
-    REGION: 'region',
-    'sprak': 'language',
-    LANGUAGE: 'language',
-    'land': 'country',
-    COUNTRY: 'country',
-    'utbildningsinriktning': 'education',
-    EDUCATION_FIELD: 'education',
-    'utbildningsniva': 'education_level',
-    EDUCATION_LEVEL: 'education_level',
-    'education_field_SUN2': 'education_field_SUN2',
-    'education_level_SUN1': 'education_level_SUN1',
-    'education_level_SUN2': 'education_level_SUN2',
-    'deprecated_educationfield': 'deprecated_educationfield',
-    'deprecated_educationlevel': 'deprecated_educationlevel',
-
-    'korkort': 'driving_licence',
-    DRIVING_LICENCE: 'driving_licence',
-    'varaktighet': 'duration_type',
-    DURATION: 'duration_type',
-    'lonetyp': 'wage_type',
-    WAGE_TYPE: 'wage_type',
-    'anstallningstyp': 'employment_type',
-    EMPLOYMENT_TYPE: 'employment_type',
-    'arbetstidstyp': 'worktime_extent',
-    WORKTIME_EXTENT: 'worktime_extent',
-    WORKTIME_EXTENT_SV: 'worktime_extent',
-    'erfarenhetsniva': 'occupation_experience',
-    OCCUPATION_EXPERIENCE: 'occupation_experience',
-}
-
-reverse_tax_type = {item[1]: item[0] for item in tax_type.items()}
-
 
 class JobtechTaxonomy:
     COUNTY = 'county'
@@ -159,11 +74,100 @@ class JobtechTaxonomy:
     WORKTIME_EXTENT = 'worktime-extent'
 
 
+tax_type = {
+    OCCUPATION: JobtechTaxonomy.OCCUPATION_NAME,
+    OCCUPATION_SV: JobtechTaxonomy.OCCUPATION_NAME,
+    'yrkesroll': JobtechTaxonomy.OCCUPATION_NAME,
+    GROUP: JobtechTaxonomy.OCCUPATION_GROUP,
+    GROUP_SV: JobtechTaxonomy.OCCUPATION_GROUP,
+    FIELD: JobtechTaxonomy.OCCUPATION_FIELD,
+    FIELD_SV: JobtechTaxonomy.OCCUPATION_FIELD,
+    SKILL: JobtechTaxonomy.SKILL,
+    SKILL_SV: JobtechTaxonomy.SKILL,
+    MUNICIPALITY: JobtechTaxonomy.MUNICIPALITY,
+    MUNICIPALITY_SV: JobtechTaxonomy.MUNICIPALITY,
+    REGION: JobtechTaxonomy.COUNTY,
+    REGION_SV: JobtechTaxonomy.COUNTY,
+    COUNTRY: JobtechTaxonomy.COUNTRY,
+    COUNTRY_SV: JobtechTaxonomy.COUNTRY,
+    WORKTIME_EXTENT: JobtechTaxonomy.WORKTIME_EXTENT,
+    WORKTIME_EXTENT_SV: JobtechTaxonomy.WORKTIME_EXTENT,
+    PLACE: 'place',
+    PLACE_SV: 'place',
+    LANGUAGE: JobtechTaxonomy.LANGUAGE,
+    LANGUAGE_SV: JobtechTaxonomy.LANGUAGE,
+    EMPLOYMENT_TYPE: JobtechTaxonomy.EMPLOYMENT_TYPE,
+    EMPLOYMENT_TYPE_SV: JobtechTaxonomy.EMPLOYMENT_TYPE,
+    DRIVING_LICENCE: JobtechTaxonomy.DRIVING_LICENCE,
+    DRIVING_LICENCE_SV: JobtechTaxonomy.DRIVING_LICENCE,
+    WAGE_TYPE: JobtechTaxonomy.WAGE_TYPE,
+    WAGE_TYPE_SV: JobtechTaxonomy.WAGE_TYPE,
+    EDUCATION_LEVEL: JobtechTaxonomy.DEPRECATED_EDUCATION_LEVEL,
+    EDUCATION_LEVEL_SV: JobtechTaxonomy.DEPRECATED_EDUCATION_LEVEL,
+    EDUCATION_FIELD: JobtechTaxonomy.DEPRECATED_EDUCATION_FIELD,
+    EDUCATION_FIELD_SV: JobtechTaxonomy.DEPRECATED_EDUCATION_FIELD,
+    DURATION: JobtechTaxonomy.EMPLOYMENT_DURATION,
+    DURATION_SV: JobtechTaxonomy.EMPLOYMENT_DURATION,
+    OCCUPATION_EXPERIENCE: JobtechTaxonomy.OCCUPATION_EXPERIENCE_YEARS,
+    OCCUPATION_EXPERIENCE_SV: JobtechTaxonomy.OCCUPATION_EXPERIENCE_YEARS,
+}
+# taxtype_legend = {
+#     'yrke': 'jobterm',
+#     'yrkesroll': 'jobterm',
+#     OCCUPATION: 'jobterm',
+#     'yrkesgrupp': 'jobgroup',
+#     GROUP: 'jobgroup',
+#     'yrkesomrade': 'jobfield',
+#     FIELD: 'jobfield',
+#     'sprak': 'language',
+#     LANGUAGE: 'language',
+#     'kompetens': 'skill',
+#     SKILL: 'skill',
+#     'kommun': 'municipality',
+#     MUNICIPALITY: 'municipality',
+#     'lan': 'region',
+#     REGION: 'region',
+#     'sprak': 'language',
+#     LANGUAGE: 'language',
+#     'land': 'country',
+#     COUNTRY: 'country',
+#     'utbildningsinriktning': 'education',
+#     EDUCATION_FIELD: 'education',
+#     'utbildningsniva': 'education_level',
+#     EDUCATION_LEVEL: 'education_level',
+#     'education_field_SUN2': 'education_field_SUN2',
+#     'education_level_SUN1': 'education_level_SUN1',
+#     'education_level_SUN2': 'education_level_SUN2',
+#     'deprecated_educationfield': 'deprecated_educationfield',
+#     'deprecated_educationlevel': 'deprecated_educationlevel',
+#
+#     'korkort': 'driving_licence',
+#     DRIVING_LICENCE: 'driving_licence',
+#     'varaktighet': 'duration_type',
+#     DURATION: 'duration_type',
+#     'lonetyp': 'wage_type',
+#     WAGE_TYPE: 'wage_type',
+#     'anstallningstyp': 'employment_type',
+#     EMPLOYMENT_TYPE: 'employment_type',
+#     'arbetstidstyp': 'worktime_extent',
+#     WORKTIME_EXTENT: 'worktime_extent',
+#     WORKTIME_EXTENT_SV: 'worktime_extent',
+#     'erfarenhetsniva': 'occupation_experience',
+#     OCCUPATION_EXPERIENCE: 'occupation_experience',
+# }
+
+reverse_tax_type = {item[1]: item[0] for item in tax_type.items()}
+
+
+
 annons_key_to_jobtech_taxonomy_key = {
     'yrkesroll': JobtechTaxonomy.OCCUPATION_NAME,
     OCCUPATION: JobtechTaxonomy.OCCUPATION_NAME,
     GROUP:JobtechTaxonomy.OCCUPATION_GROUP,
     FIELD:JobtechTaxonomy.OCCUPATION_FIELD,
+    OCCUPATION_SV: JobtechTaxonomy.OCCUPATION_NAME,
+    GROUP_SV:JobtechTaxonomy.OCCUPATION_GROUP,
+    FIELD_SV:JobtechTaxonomy.OCCUPATION_FIELD,
     'anstallningstyp': JobtechTaxonomy.EMPLOYMENT_TYPE,
     'lonetyp': JobtechTaxonomy.WAGE_TYPE,
     'varaktighet': JobtechTaxonomy.EMPLOYMENT_DURATION,
@@ -174,6 +178,7 @@ annons_key_to_jobtech_taxonomy_key = {
     'korkort': JobtechTaxonomy.DRIVING_LICENCE,
     'kompetens': JobtechTaxonomy.SKILL,
     SKILL: JobtechTaxonomy.SKILL,
+    SKILL_SV: JobtechTaxonomy.SKILL,
     'sprak': JobtechTaxonomy.LANGUAGE,
     'deprecated_educationlevel': JobtechTaxonomy.DEPRECATED_EDUCATION_LEVEL,
     'deprecated_educationfield': JobtechTaxonomy.DEPRECATED_EDUCATION_FIELD,
@@ -225,12 +230,10 @@ def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
             }
     if sort:
         query_dsl['sort'] = sort
-    print("Taxonomy query dsl: %s" % json.dumps(query_dsl, indent=2))
     return query_dsl
 
 
 def get_term(elastic_client, taxtype, taxid):
-    print(f"TYPE: {taxtype} ID: {taxid}")
     if taxtype not in taxonomy_cache:
         taxonomy_cache[taxtype] = {}
     if taxid in taxonomy_cache[taxtype]:
@@ -278,8 +281,12 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type,
             }
         }
     }
-    print("QUERY", json.dumps(query))
-    elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query)
+    try:
+        elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query)
+    except RequestError as e:
+        log.warning("RequestError", str(e))
+        return not_found_response
+
     hits = elastic_response.get('hits', {}).get('hits', [])
     if not hits:
         log.warning("No taxonomy entity found for type %s and "

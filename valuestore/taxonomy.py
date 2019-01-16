@@ -111,54 +111,8 @@ tax_type = {
     OCCUPATION_EXPERIENCE: JobtechTaxonomy.OCCUPATION_EXPERIENCE_YEARS,
     OCCUPATION_EXPERIENCE_SV: JobtechTaxonomy.OCCUPATION_EXPERIENCE_YEARS,
 }
-# taxtype_legend = {
-#     'yrke': 'jobterm',
-#     'yrkesroll': 'jobterm',
-#     OCCUPATION: 'jobterm',
-#     'yrkesgrupp': 'jobgroup',
-#     GROUP: 'jobgroup',
-#     'yrkesomrade': 'jobfield',
-#     FIELD: 'jobfield',
-#     'sprak': 'language',
-#     LANGUAGE: 'language',
-#     'kompetens': 'skill',
-#     SKILL: 'skill',
-#     'kommun': 'municipality',
-#     MUNICIPALITY: 'municipality',
-#     'lan': 'region',
-#     REGION: 'region',
-#     'sprak': 'language',
-#     LANGUAGE: 'language',
-#     'land': 'country',
-#     COUNTRY: 'country',
-#     'utbildningsinriktning': 'education',
-#     EDUCATION_FIELD: 'education',
-#     'utbildningsniva': 'education_level',
-#     EDUCATION_LEVEL: 'education_level',
-#     'education_field_SUN2': 'education_field_SUN2',
-#     'education_level_SUN1': 'education_level_SUN1',
-#     'education_level_SUN2': 'education_level_SUN2',
-#     'deprecated_educationfield': 'deprecated_educationfield',
-#     'deprecated_educationlevel': 'deprecated_educationlevel',
-#
-#     'korkort': 'driving_licence',
-#     DRIVING_LICENCE: 'driving_licence',
-#     'varaktighet': 'duration_type',
-#     DURATION: 'duration_type',
-#     'lonetyp': 'wage_type',
-#     WAGE_TYPE: 'wage_type',
-#     'anstallningstyp': 'employment_type',
-#     EMPLOYMENT_TYPE: 'employment_type',
-#     'arbetstidstyp': 'worktime_extent',
-#     WORKTIME_EXTENT: 'worktime_extent',
-#     WORKTIME_EXTENT_SV: 'worktime_extent',
-#     'erfarenhetsniva': 'occupation_experience',
-#     OCCUPATION_EXPERIENCE: 'occupation_experience',
-# }
 
 reverse_tax_type = {item[1]: item[0] for item in tax_type.items()}
-
-
 
 annons_key_to_jobtech_taxonomy_key = {
     'yrkesroll': JobtechTaxonomy.OCCUPATION_NAME,

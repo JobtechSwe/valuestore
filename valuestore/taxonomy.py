@@ -143,10 +143,14 @@ def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
     musts = []
     sort = None
     if query_string:
-        musts.append({"term": {"label": query_string}})
+        musts.append({
+            "match_phrase_prefix": {
+                "label": {
+                    "query": query_string
+                }
+            }
+        })
     else:
-        offset = 0  # TODO parametrise offset and limit
-        limit = 5000
         # Sort numerically for non-query_string-queries
         sort = [
             {

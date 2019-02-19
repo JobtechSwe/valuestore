@@ -260,7 +260,8 @@ def find_concepts(elastic_client, query_string=None, taxonomy_code=[], entity_ty
     log.debug("Query: %s" % json.dumps(query_dsl))
     try:
         elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query_dsl)
-        log.debug("Find Concepts Response: %s" % json.dumps(elastic_response))
+        log.debug("Find concepts response metrics: took: %s, timed_out: %s" %
+        (elastic_response.get('took', ''), elastic_response.get('timed_out', '')))
         return elastic_response
     except RequestError:
         log.error("Failed to query Elasticsearch")

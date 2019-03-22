@@ -50,7 +50,7 @@ OCCUPATION_EXPERIENCE = 'experience'
 
 
 class JobtechTaxonomy:
-    COUNTY = 'county'
+    REGION = 'region'
     COUNTRY = 'country'
     DEPRECATED_EDUCATION_LEVEL = 'deprecated-education-level'
     DEPRECATED_EDUCATION_FIELD = 'deprecated-education-field'
@@ -86,8 +86,8 @@ tax_type = {
     SKILL_SV: JobtechTaxonomy.SKILL,
     MUNICIPALITY: JobtechTaxonomy.MUNICIPALITY,
     MUNICIPALITY_SV: JobtechTaxonomy.MUNICIPALITY,
-    REGION: JobtechTaxonomy.COUNTY,
-    REGION_SV: JobtechTaxonomy.COUNTY,
+    REGION: JobtechTaxonomy.REGION,
+    REGION_SV: JobtechTaxonomy.REGION,
     COUNTRY: JobtechTaxonomy.COUNTRY,
     COUNTRY_SV: JobtechTaxonomy.COUNTRY,
     WORKTIME_EXTENT: JobtechTaxonomy.WORKTIME_EXTENT,
@@ -127,7 +127,7 @@ annons_key_to_jobtech_taxonomy_key = {
     'varaktighet': JobtechTaxonomy.EMPLOYMENT_DURATION,
     'arbetstidstyp': JobtechTaxonomy.WORKTIME_EXTENT,
     'kommun': JobtechTaxonomy.MUNICIPALITY,
-    'lan': JobtechTaxonomy.COUNTY,
+    'lan': JobtechTaxonomy.REGION,
     'land': JobtechTaxonomy.COUNTRY,
     'korkort': JobtechTaxonomy.DRIVING_LICENCE,
     'kompetens': JobtechTaxonomy.SKILL,

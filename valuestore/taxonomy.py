@@ -117,11 +117,11 @@ reverse_tax_type = {item[1]: item[0] for item in tax_type.items()}
 annons_key_to_jobtech_taxonomy_key = {
     'yrkesroll': JobtechTaxonomy.OCCUPATION_NAME,
     OCCUPATION: JobtechTaxonomy.OCCUPATION_NAME,
-    GROUP:JobtechTaxonomy.OCCUPATION_GROUP,
-    FIELD:JobtechTaxonomy.OCCUPATION_FIELD,
+    GROUP: JobtechTaxonomy.OCCUPATION_GROUP,
+    FIELD: JobtechTaxonomy.OCCUPATION_FIELD,
     OCCUPATION_SV: JobtechTaxonomy.OCCUPATION_NAME,
-    GROUP_SV:JobtechTaxonomy.OCCUPATION_GROUP,
-    FIELD_SV:JobtechTaxonomy.OCCUPATION_FIELD,
+    GROUP_SV: JobtechTaxonomy.OCCUPATION_GROUP,
+    FIELD_SV: JobtechTaxonomy.OCCUPATION_FIELD,
     'anstallningstyp': JobtechTaxonomy.EMPLOYMENT_TYPE,
     'lonetyp': JobtechTaxonomy.WAGE_TYPE,
     'varaktighet': JobtechTaxonomy.EMPLOYMENT_DURATION,
@@ -172,7 +172,8 @@ def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
         # musts.append({"term": {"parent.id": taxonomy_code}})
         musts.append(parent_or_grandparent)
     if entity_type:
-        musts.append({"term": {"type": entity_type}})
+        musts.append({"bool": {"should": [{"term": {"type": et}} for et in entity_type]}})
+        # musts.append({"term": {"type": entity_type}})
 
     if not musts:
         query_dsl = {"query": {"match_all": {}}, "from": offset, "size": limit}
@@ -188,6 +189,7 @@ def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
             }
     if sort:
         query_dsl['sort'] = sort
+    print(json.dumps(query_dsl))
     return query_dsl
 
 
@@ -229,10 +231,12 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type,
         "query": {
             "bool": {
                 "must": [
-                    {"term": {"legacy_ams_taxonomy_id": {"value": legacy_ams_taxonomy_id}}},
+                    {"term": {"legacy_ams_taxonomy_id": {
+                        "value": legacy_ams_taxonomy_id}}},
                     {"term": {
                         "type": {
-                            "value": annons_key_to_jobtech_taxonomy_key.get(taxonomy_type, '')
+                            "value": annons_key_to_jobtech_taxonomy_key.get(taxonomy_type,
+                                                                            '')
                         }
                     }}
                 ]
@@ -254,14 +258,15 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type,
     return hits[0]['_source']
 
 
-def find_concepts(elastic_client, query_string=None, taxonomy_code=[], entity_type=None,
+def find_concepts(elastic_client, query_string=None, taxonomy_code=[], entity_type=[],
                   offset=0, limit=10):
     query_dsl = _build_query(query_string, taxonomy_code, entity_type, offset, limit)
     log.debug("Query: %s" % json.dumps(query_dsl))
     try:
         elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query_dsl)
         log.debug("Find concepts response metrics: took: %s, timed_out: %s" %
-        (elastic_response.get('took', ''), elastic_response.get('timed_out', '')))
+                  (elastic_response.get('took', ''),
+                   elastic_response.get('timed_out', '')))
         return elastic_response
     except RequestError:
         log.error("Failed to query Elasticsearch")

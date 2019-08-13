@@ -136,6 +136,12 @@ annons_key_to_jobtech_taxonomy_key = {
     'sprak': JobtechTaxonomy.LANGUAGE,
     'deprecated_educationlevel': JobtechTaxonomy.DEPRECATED_EDUCATION_LEVEL,
     'deprecated_educationfield': JobtechTaxonomy.DEPRECATED_EDUCATION_FIELD,
+    'sun-education-level-1': JobtechTaxonomy.SUN_EDUCATION_LEVEL_1,
+    'sun-education-level-2': JobtechTaxonomy.SUN_EDUCATION_LEVEL_2,
+    'sun-education-level-3': JobtechTaxonomy.SUN_EDUCATION_LEVEL_3,
+    'sun-education-field-1': JobtechTaxonomy.SUN_EDUCATION_FIELD_1,
+    'sun-education-field-2': JobtechTaxonomy.SUN_EDUCATION_FIELD_2,
+    'sun-education-field-3': JobtechTaxonomy.SUN_EDUCATION_FIELD_3,
 }
 
 
@@ -231,18 +237,20 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type,
         "query": {
             "bool": {
                 "must": [
-                    {"term": {"legacy_ams_taxonomy_id": {
-                        "value": legacy_ams_taxonomy_id}}},
-                    {"term": {
-                        "type": {
-                            "value": annons_key_to_jobtech_taxonomy_key.get(taxonomy_type,
-                                                                            '')
-                        }
-                    }}
+                    {"term": {"legacy_ams_taxonomy_id": {"value": legacy_ams_taxonomy_id}}},
                 ]
             }
         }
     }
+    if isinstance(taxonomy_type, str):
+        query['query']['bool']['must'].append({"term": {
+            "type": {
+                "value": annons_key_to_jobtech_taxonomy_key.get(taxonomy_type, '')
+            }
+        }})
+    elif isinstance(taxonomy_type, list):
+        values = [annons_key_to_jobtech_taxonomy_key.get(t) for t in taxonomy_type]
+        query['query']['bool']['must'].append({"terms": {"type": values}})
     try:
         elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query)
     except RequestError as e:

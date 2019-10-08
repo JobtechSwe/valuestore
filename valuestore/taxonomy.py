@@ -259,9 +259,9 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type,
 
     hits = elastic_response.get('hits', {}).get('hits', [])
     if not hits:
-        log.warning("No taxonomy entity found for type %s and "
-                    "legacy id %s" % (taxonomy_type,
-                                      legacy_ams_taxonomy_id))
+        log.debug("No taxonomy entity found for type %s and "
+                  "legacy id %s" % (taxonomy_type,
+                                    legacy_ams_taxonomy_id))
         return not_found_response
     return hits[0]['_source']
 

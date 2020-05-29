@@ -253,6 +253,7 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type,
         query['query']['bool']['must'].append({"terms": {"type": values}})
     try:
         elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query)
+        log.info("Taxonomy search in index: %s with query: %s" % (ES_TAX_INDEX, json.dumps(query)))
     except RequestError as e:
         log.warning("RequestError", str(e))
         return not_found_response

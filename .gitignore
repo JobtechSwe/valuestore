@@ -1,4 +1,8 @@
-.eggs
+__pycache__
+build
 *.egg-info
-.pytest_cache
-
+*.eggs
+.pytest_cache/
+.coverage
+.idea/
+pytest_secrets.env

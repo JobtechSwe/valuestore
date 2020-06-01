@@ -243,16 +243,15 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type,
         }
     }
     if isinstance(taxonomy_type, str):
-        query['query']['bool']['must'].append({"term": {
-            "type": {
-                "value": annons_key_to_jobtech_taxonomy_key.get(taxonomy_type, '')
-            }
-        }})
+        value = annons_key_to_jobtech_taxonomy_key.get(taxonomy_type, '')
+        query['query']['bool']['must'].append({"term": {"type": {"value": value}}})
+        log.info("Taxonomy type is value. Value: %s" % value)
     elif isinstance(taxonomy_type, list):
         values = [annons_key_to_jobtech_taxonomy_key.get(t) for t in taxonomy_type]
+        log.info("Taxonomy type is list. Values: %s" % values)
         query['query']['bool']['must'].append({"terms": {"type": values}})
     try:
-        log.info("Elastic will search in index: %s with query: %s" % (ES_TAX_INDEX, json.dumps(query)))
+        log.info("Elastic will search in index: %s with query: %s" % (ES_TAX_INDEX, query))
         elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query)
     except RequestError as e:
         log.warning("RequestError", str(e))
@@ -264,7 +263,9 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type,
                   "legacy id %s" % (taxonomy_type,
                                     legacy_ams_taxonomy_id))
         return not_found_response
-    return hits[0]['_source']
+    source = hits[0]['_source']
+    log.info("(find_concept_by_legacy_ams_taxonomy_id) returns: %" % source)
+    return source
 
 
 def find_concepts(elastic_client, query_string=None, taxonomy_code=[], entity_type=[],

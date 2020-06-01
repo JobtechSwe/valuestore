@@ -195,7 +195,7 @@ def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
             }
     if sort:
         query_dsl['sort'] = sort
-    print(json.dumps(query_dsl))
+    log.info("Taxonomy QUERY: %s" % json.dumps(query_dsl))
     return query_dsl
 
 
@@ -242,6 +242,8 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type,
             }
         }
     }
+    log.info("(find_concept_by_legacy_ams_taxonomy_id) default query: %s" % json.dumps(query))
+    log.info("(find_concept_by_legacy_ams_taxonomy_id) taxtype: %s legacy_ams_id: %s" % (taxonomy_type, legacy_ams_taxonomy_id))
     if isinstance(taxonomy_type, str):
         value = annons_key_to_jobtech_taxonomy_key.get(taxonomy_type, '')
         query['query']['bool']['must'].append({"term": {"type": {"value": value}}})
@@ -250,8 +252,8 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type,
         values = [annons_key_to_jobtech_taxonomy_key.get(t) for t in taxonomy_type]
         log.info("Taxonomy type is list. Values: %s" % values)
         query['query']['bool']['must'].append({"terms": {"type": values}})
+    log.info("Elastic will search in index: %s with query: %s" % (ES_TAX_INDEX, json.dumps(query)))
     try:
-        log.info("Elastic will search in index: %s with query: %s" % (ES_TAX_INDEX, query))
         elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query)
     except RequestError as e:
         log.warning("RequestError", str(e))

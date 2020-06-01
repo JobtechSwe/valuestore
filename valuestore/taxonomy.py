@@ -264,7 +264,7 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type,
                                     legacy_ams_taxonomy_id))
         return not_found_response
     source = hits[0]['_source']
-    log.info("(find_concept_by_legacy_ams_taxonomy_id) returns: %" % source)
+    log.info("(find_concept_by_legacy_ams_taxonomy_id) returns: %s" % source)
     return source
 
 

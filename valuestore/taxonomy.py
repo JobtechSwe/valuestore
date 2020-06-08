@@ -270,6 +270,40 @@ def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type,
     return source
 
 
+def find_legacy_ams_taxonomy_id_by_concept_id(elastic_client,taxonomy_type, concept_id, not_found_response=None):
+    query = {
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"concept_id": {"value": concept_id}}},
+                ]
+            }
+        }
+    }
+    if isinstance(taxonomy_type, str):
+        query['query']['bool']['must'].append({"term": {
+            "type": {
+                "value": annons_key_to_jobtech_taxonomy_key.get(taxonomy_type, '')
+            }
+        }})
+    elif isinstance(taxonomy_type, list):
+        values = [annons_key_to_jobtech_taxonomy_key.get(t) for t in taxonomy_type]
+        query['query']['bool']['must'].append({"terms": {"type": values}})
+    try:
+        elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query)
+    except RequestError as e:
+        log.warning("RequestError", str(e))
+        return not_found_response
+
+    hits = elastic_response.get('hits', {}).get('hits', [])
+    if not hits:
+        log.debug("No taxonomy entity found for type %s and "
+                  "legacy id %s" % (taxonomy_type,
+                                    concept_id))
+        return not_found_response
+    return hits[0]['_source']
+
+
 def find_concepts(elastic_client, query_string=None, taxonomy_code=[], entity_type=[],
                   offset=0, limit=10):
     query_dsl = _build_query(query_string, taxonomy_code, entity_type, offset, limit)

@@ -304,13 +304,13 @@ def find_legacy_ams_taxonomy_id_by_concept_id(elastic_client, taxonomy_type, con
     return hits[0]['_source']
 
 
-def find_info_by_city_name(elastic_client, city, not_found_response=None):
+def find_info_by_label_name_and_type(elastic_client, label, type_info, not_found_response=None):
     query = {
         "query": {
             "bool": {
                 "must": [
-                    {"match": {"label": city}},
-                    {"match": {"type": "municipality"}}
+                    {"match": {"label": label}},
+                    {"match": {"type": type_info}}
                 ]
             }
         }
@@ -324,7 +324,31 @@ def find_info_by_city_name(elastic_client, city, not_found_response=None):
 
     hits = elastic_response.get('hits', {}).get('hits', [])
     if not hits:
-        log.debug("No taxonomy entity found for city %s and " % (city))
+        log.debug("No taxonomy entity found for  %s and " % (label))
+        return not_found_response
+    return hits[0]['_source']
+
+
+def find_info_by_label_name(elastic_client, label, not_found_response=None):
+    query = {
+        "query": {
+            "bool": {
+                "must": [
+                    {"match": {"label": label}},
+                ]
+            }
+        }
+    }
+
+    try:
+        elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query)
+    except RequestError as e:
+        log.warning("RequestError", str(e))
+        return not_found_response
+
+    hits = elastic_response.get('hits', {}).get('hits', [])
+    if not hits:
+        log.debug("No taxonomy entity found for  %s and " % (label))
         return not_found_response
     return hits[0]['_source']
 

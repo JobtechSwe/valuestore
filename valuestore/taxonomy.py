@@ -5,7 +5,7 @@ from elasticsearch.exceptions import RequestError
 
 log = logging.getLogger(__name__)
 
-ES_TAX_INDEX = os.getenv('ES_TAX_INDEX', 'taxonomy')
+ES_TAX_INDEX_ALIAS = os.getenv('ES_TAX_INDEX_ALIAS', 'taxonomy')
 taxonomy_cache = {}
 
 # Swedish Constants (not used)
@@ -74,46 +74,6 @@ class JobtechTaxonomy:
     WORKTIME_EXTENT = 'worktime-extent'
 
 
-tax_type = {
-    OCCUPATION: JobtechTaxonomy.OCCUPATION_NAME,
-    OCCUPATION_SV: JobtechTaxonomy.OCCUPATION_NAME,
-    'yrkesroll': JobtechTaxonomy.OCCUPATION_NAME,
-    GROUP: JobtechTaxonomy.OCCUPATION_GROUP,
-    GROUP_SV: JobtechTaxonomy.OCCUPATION_GROUP,
-    FIELD: JobtechTaxonomy.OCCUPATION_FIELD,
-    FIELD_SV: JobtechTaxonomy.OCCUPATION_FIELD,
-    SKILL: JobtechTaxonomy.SKILL,
-    SKILL_SV: JobtechTaxonomy.SKILL,
-    MUNICIPALITY: JobtechTaxonomy.MUNICIPALITY,
-    MUNICIPALITY_SV: JobtechTaxonomy.MUNICIPALITY,
-    REGION: JobtechTaxonomy.REGION,
-    REGION_SV: JobtechTaxonomy.REGION,
-    COUNTRY: JobtechTaxonomy.COUNTRY,
-    COUNTRY_SV: JobtechTaxonomy.COUNTRY,
-    WORKTIME_EXTENT: JobtechTaxonomy.WORKTIME_EXTENT,
-    WORKTIME_EXTENT_SV: JobtechTaxonomy.WORKTIME_EXTENT,
-    PLACE: 'place',
-    PLACE_SV: 'place',
-    LANGUAGE: JobtechTaxonomy.LANGUAGE,
-    LANGUAGE_SV: JobtechTaxonomy.LANGUAGE,
-    EMPLOYMENT_TYPE: JobtechTaxonomy.EMPLOYMENT_TYPE,
-    EMPLOYMENT_TYPE_SV: JobtechTaxonomy.EMPLOYMENT_TYPE,
-    DRIVING_LICENCE: JobtechTaxonomy.DRIVING_LICENCE,
-    DRIVING_LICENCE_SV: JobtechTaxonomy.DRIVING_LICENCE,
-    WAGE_TYPE: JobtechTaxonomy.WAGE_TYPE,
-    WAGE_TYPE_SV: JobtechTaxonomy.WAGE_TYPE,
-    EDUCATION_LEVEL: JobtechTaxonomy.DEPRECATED_EDUCATION_LEVEL,
-    EDUCATION_LEVEL_SV: JobtechTaxonomy.DEPRECATED_EDUCATION_LEVEL,
-    EDUCATION_FIELD: JobtechTaxonomy.DEPRECATED_EDUCATION_FIELD,
-    EDUCATION_FIELD_SV: JobtechTaxonomy.DEPRECATED_EDUCATION_FIELD,
-    DURATION: JobtechTaxonomy.EMPLOYMENT_DURATION,
-    DURATION_SV: JobtechTaxonomy.EMPLOYMENT_DURATION,
-    OCCUPATION_EXPERIENCE: JobtechTaxonomy.OCCUPATION_EXPERIENCE_YEARS,
-    OCCUPATION_EXPERIENCE_SV: JobtechTaxonomy.OCCUPATION_EXPERIENCE_YEARS,
-}
-
-reverse_tax_type = {item[1]: item[0] for item in tax_type.items()}
-
 annons_key_to_jobtech_taxonomy_key = {
     'yrkesroll': JobtechTaxonomy.OCCUPATION_NAME,
     OCCUPATION: JobtechTaxonomy.OCCUPATION_NAME,
@@ -145,6 +105,107 @@ annons_key_to_jobtech_taxonomy_key = {
 }
 
 
+def get_term(elastic_client, taxtype, taxid):
+    if taxtype not in taxonomy_cache:
+        taxonomy_cache[taxtype] = {}
+    if taxid in taxonomy_cache[taxtype]:
+        return taxonomy_cache[taxtype][taxid]
+    taxonomy_entity = find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxtype, taxid, {})
+    label = None
+    if 'label' in taxonomy_entity:
+        label = taxonomy_entity['label']
+    if 'term' in taxonomy_entity:
+        label = taxonomy_entity['term']
+    taxonomy_cache[taxtype][taxid] = label
+    return label
+
+
+def get_entity(elastic_client, taxtype, taxid, not_found_response=None):
+
+    # old version doc_id = "%s-%s" % (taxtype_legend.get(taxtype, ''), taxid)
+    # doc_id = taxid  # document id changed from type-id format to just the concept_id
+    taxonomy_entity = elastic_client.get_source(index=ES_TAX_INDEX_ALIAS,
+                                                id=taxid,
+                                                doc_type='_all', ignore=404)
+    if not taxonomy_entity:
+        log.warning(f"No taxonomy entity found for type: {taxtype}, id: {taxid}")
+        return not_found_response
+    return taxonomy_entity
+
+
+def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type,
+                                           legacy_ams_taxonomy_id,
+                                           not_found_response=None):
+    query = {
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"legacy_ams_taxonomy_id": {"value": legacy_ams_taxonomy_id}}},
+                ]
+            }
+        }
+    }
+    log.info(f"(find_concept_by_legacy_ams_taxonomy_id) default query: {json.dumps(query)}")
+    log.info(f"(find_concept_by_legacy_ams_taxonomy_id) taxtype: {taxonomy_type}, legacy_ams_id: {legacy_ams_taxonomy_id}")
+    if isinstance(taxonomy_type, str):
+        value = annons_key_to_jobtech_taxonomy_key.get(taxonomy_type, '')
+        query['query']['bool']['must'].append({"term": {"type": {"value": value}}})
+        log.info(f"Taxonomy type is value. Value: {value}")
+    elif isinstance(taxonomy_type, list):
+        values = [annons_key_to_jobtech_taxonomy_key.get(t) for t in taxonomy_type]
+        log.info(f"Taxonomy type is list. Values: {values}")
+        query['query']['bool']['must'].append({"terms": {"type": values}})
+    log.info(f"Elastic will search in index: {ES_TAX_INDEX_ALIAS} with query: {json.dumps(query)}")
+    try:
+        elastic_response = elastic_client.search(index=ES_TAX_INDEX_ALIAS, body=query)
+    except RequestError as e:
+        log.warning("RequestError", str(e))
+        return not_found_response
+
+    hits = elastic_response.get('hits', {}).get('hits', [])
+    if not hits:
+        log.info(f"No taxonomy entity found for type: {taxonomy_type} and legacy id: {legacy_ams_taxonomy_id}")
+        return not_found_response
+    source = hits[0]['_source']
+    log.info(f"(find_concept_by_legacy_ams_taxonomy_id) returns: {source}")
+    return source
+
+
+def find_legacy_ams_taxonomy_id_by_concept_id(elastic_client, taxonomy_type, concept_id, not_found_response=None):
+    query = {
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"concept_id": {"value": concept_id}}},
+                ]
+            }
+        }
+    }
+    if isinstance(taxonomy_type, str):
+        query['query']['bool']['must'].append({"term": {
+            "type": {
+                "value": annons_key_to_jobtech_taxonomy_key.get(taxonomy_type, '')
+            }
+        }})
+    elif isinstance(taxonomy_type, list):
+        values = [annons_key_to_jobtech_taxonomy_key.get(t) for t in taxonomy_type]
+        query['query']['bool']['must'].append({"terms": {"type": values}})
+    try:
+        elastic_response = elastic_client.search(index=ES_TAX_INDEX_ALIAS, body=query)
+    except RequestError as e:
+        log.warning("RequestError", str(e))
+        return not_found_response
+
+    hits = elastic_response.get('hits', {}).get('hits', [])
+    if not hits:
+        log.debug("No taxonomy entity found for type %s and "
+                  "legacy id %s" % (taxonomy_type,
+                                    concept_id))
+        return not_found_response
+    return hits[0]['_source']
+
+
+'''
 def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
     musts = []
     sort = None
@@ -199,111 +260,6 @@ def _build_query(query_string, taxonomy_code, entity_type, offset, limit):
     return query_dsl
 
 
-def get_term(elastic_client, taxtype, taxid):
-    if taxtype not in taxonomy_cache:
-        taxonomy_cache[taxtype] = {}
-    if taxid in taxonomy_cache[taxtype]:
-        return taxonomy_cache[taxtype][taxid]
-    taxonomy_entity = find_concept_by_legacy_ams_taxonomy_id(elastic_client,
-                                                             taxtype, taxid, {})
-    label = None
-    if 'label' in taxonomy_entity:
-        label = taxonomy_entity['label']
-    if 'term' in taxonomy_entity:
-        label = taxonomy_entity['term']
-    taxonomy_cache[taxtype][taxid] = label
-    return label
-
-
-def get_entity(elastic_client, taxtype, taxid, not_found_response=None):
-
-    # old version doc_id = "%s-%s" % (taxtype_legend.get(taxtype, ''), taxid)
-    doc_id = taxid  # document id changed from type-id format to just the concept_id
-    taxonomy_entity = elastic_client.get_source(index=ES_TAX_INDEX,
-                                                id=doc_id,
-                                                doc_type='_all', ignore=404)
-    if not taxonomy_entity:
-        log.warning("No taxonomy entity found for type %s and id %s (%s)" % (taxtype,
-                                                                             taxid,
-                                                                             doc_id))
-        return not_found_response
-    return taxonomy_entity
-
-
-def find_concept_by_legacy_ams_taxonomy_id(elastic_client, taxonomy_type,
-                                           legacy_ams_taxonomy_id,
-                                           not_found_response=None):
-    query = {
-        "query": {
-            "bool": {
-                "must": [
-                    {"term": {"legacy_ams_taxonomy_id": {"value": legacy_ams_taxonomy_id}}},
-                ]
-            }
-        }
-    }
-    log.info("(find_concept_by_legacy_ams_taxonomy_id) default query: %s" % json.dumps(query))
-    log.info("(find_concept_by_legacy_ams_taxonomy_id) taxtype: %s legacy_ams_id: %s" % (taxonomy_type, legacy_ams_taxonomy_id))
-    if isinstance(taxonomy_type, str):
-        value = annons_key_to_jobtech_taxonomy_key.get(taxonomy_type, '')
-        query['query']['bool']['must'].append({"term": {"type": {"value": value}}})
-        log.info("Taxonomy type is value. Value: %s" % value)
-    elif isinstance(taxonomy_type, list):
-        values = [annons_key_to_jobtech_taxonomy_key.get(t) for t in taxonomy_type]
-        log.info("Taxonomy type is list. Values: %s" % values)
-        query['query']['bool']['must'].append({"terms": {"type": values}})
-    log.info("Elastic will search in index: %s with query: %s" % (ES_TAX_INDEX, json.dumps(query)))
-    try:
-        elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query)
-    except RequestError as e:
-        log.warning("RequestError", str(e))
-        return not_found_response
-
-    hits = elastic_response.get('hits', {}).get('hits', [])
-    if not hits:
-        log.debug("No taxonomy entity found for type %s and "
-                  "legacy id %s" % (taxonomy_type,
-                                    legacy_ams_taxonomy_id))
-        return not_found_response
-    source = hits[0]['_source']
-    log.info("(find_concept_by_legacy_ams_taxonomy_id) returns: %s" % source)
-    return source
-
-
-def find_legacy_ams_taxonomy_id_by_concept_id(elastic_client, taxonomy_type, concept_id, not_found_response=None):
-    query = {
-        "query": {
-            "bool": {
-                "must": [
-                    {"term": {"concept_id": {"value": concept_id}}},
-                ]
-            }
-        }
-    }
-    if isinstance(taxonomy_type, str):
-        query['query']['bool']['must'].append({"term": {
-            "type": {
-                "value": annons_key_to_jobtech_taxonomy_key.get(taxonomy_type, '')
-            }
-        }})
-    elif isinstance(taxonomy_type, list):
-        values = [annons_key_to_jobtech_taxonomy_key.get(t) for t in taxonomy_type]
-        query['query']['bool']['must'].append({"terms": {"type": values}})
-    try:
-        elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query)
-    except RequestError as e:
-        log.warning("RequestError", str(e))
-        return not_found_response
-
-    hits = elastic_response.get('hits', {}).get('hits', [])
-    if not hits:
-        log.debug("No taxonomy entity found for type %s and "
-                  "legacy id %s" % (taxonomy_type,
-                                    concept_id))
-        return not_found_response
-    return hits[0]['_source']
-
-
 def find_info_by_label_name_and_type(elastic_client, label, type_info, not_found_response=None):
     query = {
         "query": {
@@ -317,7 +273,7 @@ def find_info_by_label_name_and_type(elastic_client, label, type_info, not_found
     }
 
     try:
-        elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query)
+        elastic_response = elastic_client.search(index=ES_TAX_INDEX_ALIAS, body=query)
     except RequestError as e:
         log.warning("RequestError", str(e))
         return not_found_response
@@ -341,7 +297,7 @@ def find_info_by_label_name(elastic_client, label, not_found_response=None):
     }
 
     try:
-        elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query)
+        elastic_response = elastic_client.search(index=ES_TAX_INDEX_ALIAS, body=query)
     except RequestError as e:
         log.warning("RequestError", str(e))
         return not_found_response
@@ -358,7 +314,7 @@ def find_concepts(elastic_client, query_string=None, taxonomy_code=[], entity_ty
     query_dsl = _build_query(query_string, taxonomy_code, entity_type, offset, limit)
     log.debug("Query: %s" % json.dumps(query_dsl))
     try:
-        elastic_response = elastic_client.search(index=ES_TAX_INDEX, body=query_dsl)
+        elastic_response = elastic_client.search(index=ES_TAX_INDEX_ALIAS, body=query_dsl)
         log.debug("Find concepts response metrics: took: %s, timed_out: %s" %
                   (elastic_response.get('took', ''),
                    elastic_response.get('timed_out', '')))
@@ -380,3 +336,4 @@ def format_response(elastic_response):
                                       "typ": hit['type']})
 
     return response
+'''
